@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
 import cookie from 'react-cookies'
+import { connect } from 'react-redux'
+import { setApiDialogVisibility } from '../../actions'
 
 import './style.css'
 
@@ -28,6 +30,7 @@ class UserButton extends Component {
   }
 
   handleAPIClick() {
+    this.props.dispatch(setApiDialogVisibility(true))
   }
 
   render() {
@@ -65,4 +68,4 @@ class UserButton extends Component {
   }
 }
 
-export default UserButton;
+export default connect(({ stateStuff }) => ({ stateStuff }))(UserButton);

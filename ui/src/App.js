@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { Route, Switch } from 'react-router-dom'
 import { withRouter } from 'react-router-dom';
 import cookie from 'react-cookies'
+import { connect } from 'react-redux'
 
 import Header from './components/header';
 import About from './components/About';
@@ -13,6 +14,7 @@ import FileRouter from './components/FileRouter.js';
 import GraphRouter from './components/GraphRouter.js';
 import NotFound from './components/NotFound';
 import FeedbackButton from './components/FeedbackButton'
+import APIDialog from './components/Dialogs/APIDialog'
 
 import './App.css';
 
@@ -57,6 +59,8 @@ class App extends Component {
           <FeedbackButton/>
         }
         <div className="Content">
+          {this.state.setApiDialogVisibility && <APIDialog/>
+          }
           <Switch>
             <Route exact path="/" component={Welcome} />
             <Route exact path="/welcome" component={Welcome} />
@@ -74,4 +78,17 @@ class App extends Component {
   }
 }
 
-export default withRouter(App);
+const mapStateToProps = state => ({
+  setApiDialogVisibility: state.setApiDialogVisibility
+})
+
+const mapDispatchToProps = dispatch => ({
+  //toggleTodo: id => dispatch(toggleTodo(id))
+})
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(withRouter(App))
+
+//export default withRouter(App);
