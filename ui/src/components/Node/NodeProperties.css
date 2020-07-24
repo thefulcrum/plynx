@@ -1,14 +1,3 @@
-.NodeProperties {
-  padding: 3px;
-  margin: 0px;
-}
-
-.PropertyCol {
-  display: inline-grid;
-  width: 400px;
-  padding-left: 5px;
-}
-
 .PropertyRow {
   display: grid;
   width: 100%;

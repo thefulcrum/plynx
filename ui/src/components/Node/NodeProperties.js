@@ -100,13 +100,12 @@ export default class NodeProperties extends Component {
 
     return (
       <div className='NodeProperties'>
-        <div className='PropertyCol'>
+        <div className="PropertiesHeader">
+          {`Properties of ${this.props.title}`}
+        </div>
+        <div className='PropertiesBoxRoot'>
           { makePropertiesBox('Properties', customPropertiesItems) }
-        </div>
-        <div className='PropertyCol'>
           { makePropertiesBox('State properties', statePropertiesItems) }
-        </div>
-        <div className='PropertyCol'>
           { makePropertiesBox('Inheritance', inheritancePropertiesItems) }
         </div>
       </div>

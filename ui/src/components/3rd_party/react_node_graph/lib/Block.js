@@ -26,6 +26,8 @@ class Block extends React.Component {
       y: PropTypes.number.isRequired,
     }),
 
+    className: PropTypes.string,
+
     highlight: PropTypes.bool.isRequired,
     index: PropTypes.number.isRequired,
     readonly: PropTypes.bool.isRequired,
@@ -113,7 +115,7 @@ class Block extends React.Component {
       {
         plugins_dict => <div onClick={(e) => {
           this.handleClick(e);
-        }} style={{position: 'relative'}}>
+      }} className={this.props.className || "node-body"}>
         <Draggable
           defaultPosition={{x: this.props.node.x, y: this.props.node.y}}
           handle=".node-header,.node-header-title,.node-content"

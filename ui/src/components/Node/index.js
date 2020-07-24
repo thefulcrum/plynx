@@ -1,12 +1,13 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import Block from '../3rd_party/react_node_graph/lib/Block';
 import NodeProperties from './NodeProperties';
 import InOutList from './InOutList';
 import ParameterList from './ParameterList';
 import PreviewDialog from '../Dialogs/PreviewDialog';
 import { PluginsProvider, PluginsConsumer } from '../../contexts';
 import { HotKeys } from 'react-hotkeys';
-import { KEY_MAP } from '../../constants';
+import { KEY_MAP, NODE_RUNNING_STATUS } from '../../constants';
 import { addStyleToTourSteps } from '../../utils';
 
 import './style.css';
@@ -120,7 +121,74 @@ export default class Node extends Component {
             />
         }
         <PluginsProvider value={this.props.plugins_dict}>
-          <div className='EditNodeHeader'>
+
+          <div className='EditNodeGrid'>
+
+              {this.state.node &&
+                  <Block
+                        index={0}
+                        node={this.state.node}
+                        highlight={false}
+                        key={1}
+                        className="node-preview-body"
+
+                        readonly={!this.state.editable || this.state.node.node_running_status === NODE_RUNNING_STATUS.SPECIAL}
+                      />
+              }
+
+            <div className='EditNodeComponents'>
+
+                <div className='EditNodeColumn EditNodeInputs'>
+                  <div className='EditNodePropTitle'>
+                    Inputs
+                  </div>
+                  <div className='EditNodeList'>
+                    <InOutList
+                      varName='inputs'
+                      items={node.inputs}
+                      key={key}
+                      nodeKind={node.kind}
+                      onChanged={(value) => this.handleParameterChanged('inputs', value)}
+                      readOnly={this.state.readOnly || this.state.is_workflow}
+                    />
+                  </div>
+                </div>
+
+                <div className='EditNodeColumn EditNodeParameters'>
+                  <div className='EditNodePropTitle'>
+                    Parameters
+                  </div>
+                  <div className='EditNodeList'>
+                    <ParameterList
+                      items={node.parameters}
+                      key={key}
+                      onChanged={(value) => this.handleParameterChanged('parameters', value)}
+                      readOnly={this.state.readOnly}
+                    />
+                  </div>
+                </div>
+
+                <div className='EditNodeColumn EditNodeOutputs'>
+                  <div className='EditNodePropTitle'>
+                    Outputs
+                  </div>
+                  <div className='EditNodeList'>
+                    <InOutList
+                      varName='outputs'
+                      items={node.outputs}
+                      key={key}
+                      nodeKind={node.kind}
+                      onChanged={(value) => this.handleParameterChanged('outputs', value)}
+                      readOnly={this.state.readOnly || this.state.is_workflow}
+                      onPreview={(previewData) => this.handlePreview(previewData)}
+                    />
+                  </div>
+                </div>
+
+            </div>
+
+          </div>
+          <div className='PropertiesBar'>
             <PluginsConsumer>
             { plugins_dict => <NodeProperties
                   title={node.title}
@@ -138,56 +206,6 @@ export default class Node extends Component {
                  />
              }
             </PluginsConsumer>
-          </div>
-          <div className='EditNodeComponents'>
-
-            <div className='EditNodeColumn EditNodeInputs'>
-              <div className='EditNodePropTitle'>
-                Inputs
-              </div>
-              <div className='EditNodeList'>
-                <InOutList
-                  varName='inputs'
-                  items={node.inputs}
-                  key={key}
-                  nodeKind={node.kind}
-                  onChanged={(value) => this.handleParameterChanged('inputs', value)}
-                  readOnly={this.state.readOnly || this.state.is_workflow}
-                />
-              </div>
-            </div>
-
-            <div className='EditNodeColumn EditNodeParameters'>
-              <div className='EditNodePropTitle'>
-                Parameters
-              </div>
-              <div className='EditNodeList'>
-                <ParameterList
-                  items={node.parameters}
-                  key={key}
-                  onChanged={(value) => this.handleParameterChanged('parameters', value)}
-                  readOnly={this.state.readOnly}
-                />
-              </div>
-            </div>
-
-            <div className='EditNodeColumn EditNodeOutputs'>
-              <div className='EditNodePropTitle'>
-                Outputs
-              </div>
-              <div className='EditNodeList'>
-                <InOutList
-                  varName='outputs'
-                  items={node.outputs}
-                  key={key}
-                  nodeKind={node.kind}
-                  onChanged={(value) => this.handleParameterChanged('outputs', value)}
-                  readOnly={this.state.readOnly || this.state.is_workflow}
-                  onPreview={(previewData) => this.handlePreview(previewData)}
-                />
-              </div>
-            </div>
-
           </div>
         </PluginsProvider>
       </HotKeys>

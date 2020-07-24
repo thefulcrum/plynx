@@ -1,16 +1,19 @@
 .EditNodeMain {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   height: 100%;
   width: 100%;
   font-family: 'Source Sans Pro', sans-serif;
+  line-height: 20px;
+  background-color: #2b2b2b;
+  -webkit-font-smoothing: antialiased;
 }
 
-.EditNodeHeader {
-  background-color: #3b3b3b;
-  width: 100%;
-  padding: 3px;
-  border-bottom: 1px solid black;
+.EditNodeGrid {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
 .EditNodeColumn {
@@ -24,7 +27,7 @@
   display: flex;
   flex-direction: row;
   width: 100%;
-  overflow: auto;
+  overflow-y: scroll;
 }
 
 .EditNodePropTitle {
@@ -33,15 +36,15 @@
   text-align: center;
   background-color: #2b2b2b;
   color: #fff;
+  padding-top: 5px;
 }
 
 .EditNodeList {
   flex: 1;
-  overflow: auto;
 }
 
 .EditNodeColumn {
-  background-color: #5b5b5b;
+  background-color: #2b2b2b;
 }
 
 .EditNodeParameters {
@@ -71,4 +74,9 @@
   color: #2196F3;
   cursor: pointer;
   background-color: #aaa;
+}
+
+
+.node-preview-body > .node {
+    position: relative;
 }
