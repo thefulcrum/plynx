@@ -1,242 +1,99 @@
 import React, { Component } from 'react';
-import Tour from 'reactour';
+import APIObject from '../Common/APIObject';
 import PropTypes from 'prop-types';
-import DirectoryColumn from './DirectoryColumn';
-import queryString from 'query-string';
-import AlertContainer from '../3rd_party/react-alert';
-import { PLynxApi } from '../../API';
-import cookie from 'react-cookies';
-import LoadingScreen from '../LoadingScreen';
-import {
-  ACTION,
-  RELOAD_OPTIONS,
-  RESPONCE_STATUS,
-  ALERT_OPTIONS,
-  VALIDATION_CODES,
-  VALIDATION_TARGET_TYPE,
-  NODE_STATUS,
-  COLLECTIONS,
-  ACTIVE_NODE_RUNNING_STATUSES,
-} from '../../constants';
-import HubPanel from '../Graph/HubPanel';
-import RunList from '../NodeList/runList';
-import DeprecateDialog from '../Dialogs/DeprecateDialog';
-import TextViewDialog from '../Dialogs/TextViewDialog';
+import makePropertiesBox from '../Common/makePropertiesBox';
+import ParameterItem from '../Common/ParameterItem';
+import { makeControlPanel, makeControlButton } from '../Common/controlButton';
+import { COLLECTIONS, IAM_POLICIES, USER_POST_ACTION, OPERATION_VIEW_SETTING, RESPONCE_STATUS } from '../../constants';
+import { validatePassword } from '../Common/passwordUtils';
+import {renderHubItem} from '../Graph/HubEntryListNode';
+import SortableTree from "react-sortable-tree";
 import { PluginsProvider } from '../../contexts';
-import { makeControlPanel, makeControlToggles, makeControlButton, makeControlSeparator } from '../Common/controlButton';
-import { addStyleToTourSteps } from '../../utils';
-import "./style.css";
+import cookie from 'react-cookies';
+
+import './style.css';
+import './node-renderer-default.css';
+import './placeholder-renderer-default.css';
+import './react-sortable-tree.css';
+import './tree-node.css';
+import FileExplorerTheme from 'react-sortable-tree-theme-file-explorer';
+
+const NODE_VIEW_MODES = [OPERATION_VIEW_SETTING.KIND_AND_TITLE, OPERATION_VIEW_SETTING.TITLE_AND_DESCRIPTION];
 
 
-export const VIEW_MODE = Object.freeze({
-  NONE: 'none',
-  GRAPH: 0,
-  NODE: 1,
-  RUNS: 2,
-});
+function findError(treeDataChildren) {
+  console.log('findError', treeDataChildren);
+  if (!treeDataChildren) {
+      return false;
+  }
+  for (const treeData of treeDataChildren) {
+      if (treeData.children && treeData.children.length > 0) {
+        if (treeData.canExpand !== undefined && !treeData.canExpand) {
+            return true;
+        }
+        if (findError(treeData.children)) {
+            return true;
+        }
+      }
+  }
+  return false;
+}
 
-
-const FIRST_TIME_APPROVED_STATE = 'first_time_approved_state';
-const UPDATE_TIMEOUT = 1000;
-
+const PLUGINS_DICT = {"resources_dict": {"file": {"kind": "file", "title": "File", "cls": "plynx.plugins.resources.common.File", "icon": "feathericons.file", "color": "#fff"}, "pdf": {"kind": "pdf", "title": "PDF file", "cls": "plynx.plugins.resources.common.PDF", "icon": "plynx.pdf", "color": "#ffffff"}, "image": {"kind": "image", "title": "Image", "cls": "plynx.plugins.resources.common.Image", "icon": "plynx.image", "color": "#ffffff"}, "csv": {"kind": "csv", "title": "CSV file", "cls": "plynx.plugins.resources.common.CSV", "icon": "plynx.csv", "color": "#ffffff"}, "tsv": {"kind": "tsv", "title": "TSV file", "cls": "plynx.plugins.resources.common.TSV", "icon": "plynx.tsv", "color": "#ffffff"}, "json": {"kind": "json", "title": "JSON file", "cls": "plynx.plugins.resources.common.Json", "icon": "plynx.json", "color": "#ffffff"}, "executable": {"kind": "executable", "title": "Executable", "cls": "plynx.plugins.resources.common.Executable", "icon": "feathericons.play", "color": "#fcff57"}, "directory": {"kind": "directory", "title": "Directory", "cls": "plynx.plugins.resources.common.Directory", "icon": "feathericons.folder", "color": "#f44"}, "cloud-storage": {"kind": "cloud-storage", "title": "Cloud Storage", "cls": "plynx.plugins.resources.cloud_resources.CloudStorage", "icon": "feathericons.hard-drive", "color": "#5ed1ff"}}, "operations_dict": {"basic-file": {"kind": "basic-file", "title": "File", "executor": "plynx.plugins.executors.local.File", "hubs": [], "resources": [{"kind": "file", "title": "File", "cls": "plynx.plugins.resources.common.File", "icon": "feathericons.file", "color": "#fff"}, {"kind": "pdf", "title": "PDF file", "cls": "plynx.plugins.resources.common.PDF", "icon": "plynx.pdf", "color": "#ffffff"}, {"kind": "image", "title": "Image", "cls": "plynx.plugins.resources.common.Image", "icon": "plynx.image", "color": "#ffffff"}, {"kind": "csv", "title": "CSV file", "cls": "plynx.plugins.resources.common.CSV", "icon": "plynx.csv", "color": "#ffffff"}, {"kind": "tsv", "title": "TSV file", "cls": "plynx.plugins.resources.common.TSV", "icon": "plynx.tsv", "color": "#ffffff"}, {"kind": "json", "title": "JSON file", "cls": "plynx.plugins.resources.common.Json", "icon": "plynx.json", "color": "#ffffff"}, {"kind": "executable", "title": "Executable", "cls": "plynx.plugins.resources.common.Executable", "icon": "feathericons.play", "color": "#fcff57"}, {"kind": "directory", "title": "Directory", "cls": "plynx.plugins.resources.common.Directory", "icon": "feathericons.folder", "color": "#f44"}, {"kind": "cloud-storage", "title": "Cloud Storage", "cls": "plynx.plugins.resources.cloud_resources.CloudStorage", "icon": "feathericons.hard-drive", "color": "#5ed1ff"}], "icon": "feathericons.file", "color": "#fff", "is_static": true}, "basic-bash-jinja2-operation": {"kind": "basic-bash-jinja2-operation", "title": "BashJinja2 Operation", "executor": "plynx.plugins.executors.local.BashJinja2", "hubs": [], "resources": [{"kind": "file", "title": "File", "cls": "plynx.plugins.resources.common.File", "icon": "feathericons.file", "color": "#fff"}, {"kind": "pdf", "title": "PDF file", "cls": "plynx.plugins.resources.common.PDF", "icon": "plynx.pdf", "color": "#ffffff"}, {"kind": "image", "title": "Image", "cls": "plynx.plugins.resources.common.Image", "icon": "plynx.image", "color": "#ffffff"}, {"kind": "csv", "title": "CSV file", "cls": "plynx.plugins.resources.common.CSV", "icon": "plynx.csv", "color": "#ffffff"}, {"kind": "tsv", "title": "TSV file", "cls": "plynx.plugins.resources.common.TSV", "icon": "plynx.tsv", "color": "#ffffff"}, {"kind": "json", "title": "JSON file", "cls": "plynx.plugins.resources.common.Json", "icon": "plynx.json", "color": "#ffffff"}, {"kind": "executable", "title": "Executable", "cls": "plynx.plugins.resources.common.Executable", "icon": "feathericons.play", "color": "#fcff57"}, {"kind": "directory", "title": "Directory", "cls": "plynx.plugins.resources.common.Directory", "icon": "feathericons.folder", "color": "#f44"}, {"kind": "cloud-storage", "title": "Cloud Storage", "cls": "plynx.plugins.resources.cloud_resources.CloudStorage", "icon": "feathericons.hard-drive", "color": "#5ed1ff"}], "icon": "feathericons.terminal", "color": "#0f0", "is_static": false}, "basic-python-node-operation": {"kind": "basic-python-node-operation", "title": "Python Operation", "executor": "plynx.plugins.executors.local.PythonNode", "hubs": [], "resources": [{"kind": "file", "title": "File", "cls": "plynx.plugins.resources.common.File", "icon": "feathericons.file", "color": "#fff"}, {"kind": "pdf", "title": "PDF file", "cls": "plynx.plugins.resources.common.PDF", "icon": "plynx.pdf", "color": "#ffffff"}, {"kind": "image", "title": "Image", "cls": "plynx.plugins.resources.common.Image", "icon": "plynx.image", "color": "#ffffff"}, {"kind": "csv", "title": "CSV file", "cls": "plynx.plugins.resources.common.CSV", "icon": "plynx.csv", "color": "#ffffff"}, {"kind": "tsv", "title": "TSV file", "cls": "plynx.plugins.resources.common.TSV", "icon": "plynx.tsv", "color": "#ffffff"}, {"kind": "json", "title": "JSON file", "cls": "plynx.plugins.resources.common.Json", "icon": "plynx.json", "color": "#ffffff"}, {"kind": "executable", "title": "Executable", "cls": "plynx.plugins.resources.common.Executable", "icon": "feathericons.play", "color": "#fcff57"}, {"kind": "directory", "title": "Directory", "cls": "plynx.plugins.resources.common.Directory", "icon": "feathericons.folder", "color": "#f44"}, {"kind": "cloud-storage", "title": "Cloud Storage", "cls": "plynx.plugins.resources.cloud_resources.CloudStorage", "icon": "feathericons.hard-drive", "color": "#5ed1ff"}], "icon": "plynx.python-logo-notext", "color": "", "is_static": false}, "k8s-bash-jinja2-operation": {"kind": "k8s-bash-jinja2-operation", "title": "Kubernetes BashJinja2", "executor": "plynx.plugins.executors.kubernetes.BashJinja2", "hubs": [], "resources": [{"kind": "file", "title": "File", "cls": "plynx.plugins.resources.common.File", "icon": "feathericons.file", "color": "#fff"}, {"kind": "pdf", "title": "PDF file", "cls": "plynx.plugins.resources.common.PDF", "icon": "plynx.pdf", "color": "#ffffff"}, {"kind": "image", "title": "Image", "cls": "plynx.plugins.resources.common.Image", "icon": "plynx.image", "color": "#ffffff"}, {"kind": "csv", "title": "CSV file", "cls": "plynx.plugins.resources.common.CSV", "icon": "plynx.csv", "color": "#ffffff"}, {"kind": "tsv", "title": "TSV file", "cls": "plynx.plugins.resources.common.TSV", "icon": "plynx.tsv", "color": "#ffffff"}, {"kind": "json", "title": "JSON file", "cls": "plynx.plugins.resources.common.Json", "icon": "plynx.json", "color": "#ffffff"}, {"kind": "executable", "title": "Executable", "cls": "plynx.plugins.resources.common.Executable", "icon": "feathericons.play", "color": "#fcff57"}, {"kind": "directory", "title": "Directory", "cls": "plynx.plugins.resources.common.Directory", "icon": "feathericons.folder", "color": "#f44"}, {"kind": "cloud-storage", "title": "Cloud Storage", "cls": "plynx.plugins.resources.cloud_resources.CloudStorage", "icon": "feathericons.hard-drive", "color": "#5ed1ff"}], "icon": "plynx.kubernetes", "color": "#0f0", "is_static": false}, "k8s-python-node-operation": {"kind": "k8s-python-node-operation", "title": "Kubernetes Python", "executor": "plynx.plugins.executors.kubernetes.PythonNode", "hubs": [], "resources": [{"kind": "file", "title": "File", "cls": "plynx.plugins.resources.common.File", "icon": "feathericons.file", "color": "#fff"}, {"kind": "pdf", "title": "PDF file", "cls": "plynx.plugins.resources.common.PDF", "icon": "plynx.pdf", "color": "#ffffff"}, {"kind": "image", "title": "Image", "cls": "plynx.plugins.resources.common.Image", "icon": "plynx.image", "color": "#ffffff"}, {"kind": "csv", "title": "CSV file", "cls": "plynx.plugins.resources.common.CSV", "icon": "plynx.csv", "color": "#ffffff"}, {"kind": "tsv", "title": "TSV file", "cls": "plynx.plugins.resources.common.TSV", "icon": "plynx.tsv", "color": "#ffffff"}, {"kind": "json", "title": "JSON file", "cls": "plynx.plugins.resources.common.Json", "icon": "plynx.json", "color": "#ffffff"}, {"kind": "executable", "title": "Executable", "cls": "plynx.plugins.resources.common.Executable", "icon": "feathericons.play", "color": "#fcff57"}, {"kind": "directory", "title": "Directory", "cls": "plynx.plugins.resources.common.Directory", "icon": "feathericons.folder", "color": "#f44"}, {"kind": "cloud-storage", "title": "Cloud Storage", "cls": "plynx.plugins.resources.cloud_resources.CloudStorage", "icon": "feathericons.hard-drive", "color": "#5ed1ff"}], "icon": "plynx.kubernetes", "color": "", "is_static": false}, "basic-dag-operation": {"kind": "basic-dag-operation", "title": "Composite Operation", "executor": "plynx.plugins.executors.dag.DAG", "hubs": ["db-hub"], "resources": [{"kind": "file", "title": "File", "cls": "plynx.plugins.resources.common.File", "icon": "feathericons.file", "color": "#fff"}, {"kind": "pdf", "title": "PDF file", "cls": "plynx.plugins.resources.common.PDF", "icon": "plynx.pdf", "color": "#ffffff"}, {"kind": "image", "title": "Image", "cls": "plynx.plugins.resources.common.Image", "icon": "plynx.image", "color": "#ffffff"}, {"kind": "csv", "title": "CSV file", "cls": "plynx.plugins.resources.common.CSV", "icon": "plynx.csv", "color": "#ffffff"}, {"kind": "tsv", "title": "TSV file", "cls": "plynx.plugins.resources.common.TSV", "icon": "plynx.tsv", "color": "#ffffff"}, {"kind": "json", "title": "JSON file", "cls": "plynx.plugins.resources.common.Json", "icon": "plynx.json", "color": "#ffffff"}, {"kind": "executable", "title": "Executable", "cls": "plynx.plugins.resources.common.Executable", "icon": "feathericons.play", "color": "#fcff57"}, {"kind": "directory", "title": "Directory", "cls": "plynx.plugins.resources.common.Directory", "icon": "feathericons.folder", "color": "#f44"}, {"kind": "cloud-storage", "title": "Cloud Storage", "cls": "plynx.plugins.resources.cloud_resources.CloudStorage", "icon": "feathericons.hard-drive", "color": "#5ed1ff"}], "icon": "feathericons.grid", "color": "#5ed1ff", "is_static": false}}, "hubs_dict": {"db-hub": {"kind": "db-hub", "title": "Database hub", "icon": "feathericons.database", "color": "#ffffff", "cls": "plynx.plugins.hubs.collection.CollectionHub", "args": {"operations": ["basic-file", "basic-bash-jinja2-operation", "basic-python-node-operation", "k8s-bash-jinja2-operation", "k8s-python-node-operation", "basic-dag-operation"], "collection": "templates"}}}, "workflows_dict": {"basic-dag-workflow": {"kind": "basic-dag-workflow", "title": "Basic DAG Workflow", "executor": "plynx.plugins.executors.dag.DAG", "operations": [], "hubs": ["db-hub"], "icon": "feathericons.grid", "color": "#5ed1ff"}}, "executors_info": {"basic-dag-workflow": {"is_graph": true, "title": "Basic DAG Workflow", "icon": "feathericons.grid", "color": "#5ed1ff"}, "basic-file": {"is_graph": false, "title": "File", "icon": "feathericons.file", "color": "#fff"}, "basic-bash-jinja2-operation": {"is_graph": false, "title": "BashJinja2 Operation", "icon": "feathericons.terminal", "color": "#0f0"}, "basic-python-node-operation": {"is_graph": false, "title": "Python Operation", "icon": "plynx.python-logo-notext", "color": ""}, "k8s-bash-jinja2-operation": {"is_graph": false, "title": "Kubernetes BashJinja2", "icon": "plynx.kubernetes", "color": "#0f0"}, "k8s-python-node-operation": {"is_graph": false, "title": "Kubernetes Python", "icon": "plynx.kubernetes", "color": ""}, "basic-dag-operation": {"is_graph": true, "title": "Composite Operation", "icon": "feathericons.grid", "color": "#5ed1ff"}, "dummy": {"is_graph": false, "title": "", "icon": "feathericons.grid", "color": "#5ed1ff"}}};
 
 export default class Group extends Component {
   static propTypes = {
-    history: PropTypes.object.isRequired,
-    location: PropTypes.object.isRequired,
-    collection: PropTypes.string.isRequired,
     match: PropTypes.shape({
       params: PropTypes.shape({
-        group_id: PropTypes.string,
+        group_id: PropTypes.string.isRequired
       }),
     }),
   }
 
   constructor(props) {
     super(props);
-
+    document.title = "Groups - PLynx";
     this.state = {
-      editable: true,
-      loading: true,
-      view_mode: VIEW_MODE.NONE,
-      deprecateQuestionDialog: false,
-      deprecateParentDialog: false,
-      collection: null,
-      tourSteps: [],
-      activeStatus: false,
+      group_id: this.group_id,
+      treeData: [
+        { title: () => renderHubItem({title: "Chicken", kind: "basic-python-node-operation"}), expanded: true, children: [
+            { title: () => renderHubItem({title: "Egg", kind: "basic-bash-jinja2-operation"}) }
+        ]},
+        { title: () => renderHubItem({title: "Child", kind: "basic-bash-jinja2-operation"}), expanded: false, canExpand: false },
+        { title: () => renderHubItem({title: "Egg38", kind: "basic-bash-jinja2-operation"}), expanded: false, canDrop: false, canDrag: false },
+        ],
+      plugins_dict: PLUGINS_DICT,
     };
-
-    let token = cookie.load('refresh_token');
-    // TODO remove after demo
-    if (token === 'Not assigned') {
-      token = cookie.load('access_token');
-    }
-
-    this.tour_steps = [];
-    console.log(global.appVersion);
   }
 
-  sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-  }
-
-  async componentDidMount() {
-    // Loading
-
-    const self = this;
-    let loading = true;
-    const group_id = this.props.match.params.group_id.replace(/\$+$/, '');
-    let sleepPeriod = 1000;
-    const sleepMaxPeriod = 10000;
-    const sleepStep = 1000;
-
-    const loadNode = (response) => {
-      const searchValues = queryString.parse(this.props.location.search);
-      const group = response.data.group;
-      self.group = group;
-      console.log('group', group);
-
-      self.setState({
-        plugins_dict: response.data.plugins_dict,
-        group: self.group,
-      });
-
-      console.log('group_id:', group_id);
-      if (!group_id.startsWith(self.group._id)) {
-        self.props.history.replace("/" + self.props.collection + "/" + self.group._id + '$');
-      }
-
-      loading = false;
-    };
-
-    const handleError = (error) => {
-      console.error(error);
-      console.error('-----------');
-      if (!error.response) {
-        self.setState({error_message: error});
-      } else if (error.response.status === 404) {
-        self.props.history.replace("/not_found");
-        window.location.reload(false);
-        loading = false;
-      } else if (error.response.status === 401) {
-        PLynxApi.getAccessToken()
-        .then((isSuccessfull) => {
-          if (!isSuccessfull) {
-            console.error("Could not refresh token");
-            window.location = '/login';
-          } else {
-            self.showAlert('Updated access token', 'success');
-          }
-        });
-      }
-    };
-
-    /* eslint-disable no-await-in-loop */
-    /* eslint-disable no-unmodified-loop-condition */
-    while (loading) {
-      await PLynxApi.endpoints[self.props.collection].getOne({ id: group_id})
-      .then(loadNode)
-      .catch(handleError);
-      if (loading) {
-        await self.sleep(sleepPeriod);
-        sleepPeriod = Math.min(sleepPeriod + sleepStep, sleepMaxPeriod);
-      }
-    }
-    /* eslint-enable no-unmodified-loop-condition */
-    /* eslint-enable no-await-in-loop */
-
-    // Stop loading
-    self.setState({
-      loading: false,
+  loadGroup(group) {
+    this.group = group;
+    console.log('resp', group);
+    this.setState({
+      group: this.group,
     });
-  }
-
-  componentWillUnmount() {
-    if (this.timeout) {
-      clearTimeout(this.timeout);
-    }
-  }
-
-  postGroup({group, reloadOption, action, retryOnAuth = true} = {}) {
-    /* action might be in {'save', 'validate', 'approve', 'deprecate'}*/
-    const self = this;
-    self.setState({loading: true});
-
-    console.log(action, group);
-
-
-    PLynxApi.endpoints.groups
-    .create({
-      group: group,
-      action: action
-    })
-    .then((response) => {
-      const data = response.data;
-      console.log('response', data);
-      self.setState({loading: false});
-      if (data.status === RESPONCE_STATUS.SUCCESS) {
-        if (reloadOption === RELOAD_OPTIONS.OPEN_NEW_LINK) {
-          this.props.history.push(response.data.url);
-        }
-
-        if (action === ACTION.SAVE) {
-          self.showAlert("Saved", 'success');
-        }
-      } else {
-        console.warn(data.message);
-        self.showAlert(data.message, 'failed');
-      }
-    })
-    .catch((error) => {
-      console.log(error);
-      if (error.response.status === 401) {
-        PLynxApi.getAccessToken()
-        .then((isSuccessfull) => {
-          if (!isSuccessfull) {
-            console.error("Could not refresh token");
-            self.showAlert('Failed to authenticate', 'failed');
-          } else if (retryOnAuth) {
-                // Token updated, try posting again
-            self.postGroup({group: group, reloadOption: reloadOption, action: action, retryOnAuth: false});
-          } else {
-            self.showAlert('Failed to save the graph, please try again', 'failed');
-          }
-        });
-      } else {
-        try {
-          self.showAlert(error.response.data.message, 'failed');
-        } catch {
-          self.showAlert('Unknown error', 'failed');
-        }
-      }
-      self.setState({loading: false});
-    });
-  }
-
-  showAlert(message, type) {
-    this.msg.show(message, {
-      time: 5000,
-      type: 'error',
-      icon: <img src={"/alerts/" + type + ".svg"} width="32" height="32" alt="alert"/>
-    });
-  }
-
-  handleNodeChange(node) {
-    this.node = node;
   }
 
   handleSave() {
-    console.log('to_save', this.group);
-    this.postGroup({
+    this.apiObject.postData({
       group: this.group,
-      action: ACTION.SAVE,
-      reloadOption: RELOAD_OPTIONS.NONE,
     });
   }
 
-
-  handleTour() {
-    this.setState({tourSteps: []});
+  handlePostResponse(data) {
+    if (data.status === RESPONCE_STATUS.SUCCESS) {
+      this.apiObject.showAlert('Saved', 'success');
+      const refresh = cookie.load('user').username === data.user.username;
+      cookie.save('user', data.user, { path: '/' });
+      console.log('settings', data.settings);
+      cookie.save('settings', data.settings, { path: '/' });
+      if (refresh) {
+        // Need to reload header if this is the current user
+        window.location.reload(false);
+      }
+    } else {
+      this.apiObject.showAlert(data.message, 'failed');
+    }
   }
 
   makeControls() {
@@ -246,53 +103,56 @@ export default class Group extends Component {
         props: {
           img: 'save.svg',
           text: 'Save',
-          enabled: this.state.editable,
+          enabled: !this.state.user._readonly,
           func: () => this.handleSave(),
         },
-      }
+      },
     ];
 
     return makeControlPanel(
       {
         props: {
           items: items,
-          key: this.state.view_mode + this.state.editable,
+          key: 'control',
         },
       });
   }
 
+  handleChangeTree(treeData) {
+    console.log(treeData);
+    //this.setState({ treeData });
+    if (!findError(treeData)) {
+      this.setState({ treeData });
+    }
+  }
+
   render() {
+
     return (
-        <div
-          className={`group-view`}
-        >
-          <PluginsProvider value={this.state.plugins_dict}>
-              <AlertContainer ref={a => this.msg = a} {...ALERT_OPTIONS} />
-              {this.state.loading &&
-                <LoadingScreen
-                ></LoadingScreen>
-              }
-              {this.makeControls()}
-              {this.state.group &&
-                  <div>
-                    <pre>
-                    {this.state.group._id}
-                    </pre>
-                    <DirectoryColumn items={this.state.group.items} />
-                  </div>
-              }
-          </PluginsProvider>
-          <Tour
-              key={this.state.tourSteps}
-              steps={this.state.tourSteps}
-              isOpen={this.state.tourSteps.length > 0}
-              maskSpace={10}
-              rounded={10}
-              onRequestClose={() => {
-                this.setState({tourSteps: []});
-              }}
-          />
-        </div>
+      <div className='group-view-content'>
+        {false &&
+        <APIObject
+            collection={COLLECTIONS.GROUPS}
+            object_id={this.props.group_id}
+            onUpdateData={data => {
+              this.loadGroup(data.user);
+            }}
+            onPostResponse={data => {
+              this.handlePostResponse(data);
+            }}
+            ref={a => this.apiObject = a}
+        />
+        }
+        <PluginsProvider value={this.state.plugins_dict}>
+          <div style={{diplay: 'block', height: '100%'}}>
+            <SortableTree
+              treeData={this.state.treeData}
+              onChange={(treeData) => this.handleChangeTree(treeData)}
+              //theme={FileExplorerTheme}
+            />
+          </div>
+        </PluginsProvider>
+      </div>
     );
   }
 }

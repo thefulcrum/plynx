@@ -64,6 +64,8 @@ def post_search_nodes(collection):
 @requires_auth
 def get_nodes(collection, node_link=None):
     user_id = to_object_id(g.user._id)
+    app.logger.debug('-'*100)
+    app.logger.debug(json.dumps(PLUGINS_DICT))
     # if node_link is a base node
     if node_link in executor_manager.kind_to_executor_class and collection == Collections.TEMPLATES:
         kind = node_link

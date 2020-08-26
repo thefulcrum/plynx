@@ -13,7 +13,8 @@ import './style.css';
 
 const NODE_VIEW_MODES = [OPERATION_VIEW_SETTING.KIND_AND_TITLE, OPERATION_VIEW_SETTING.TITLE_AND_DESCRIPTION];
 
-export default class LogIn extends Component {
+
+export default class UserView extends Component {
   static propTypes = {
     match: PropTypes.shape({
       params: PropTypes.shape({

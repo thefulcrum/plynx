@@ -36,22 +36,29 @@ class HubEntryListNode extends Component {
 
     return connectDragSource(
       <div className={'NodeItemDnD'}>
-        <PluginsConsumer>
-        {
-            plugins_dict => <div className="hub-item hub-item-node">
-              <Icon
-                type_descriptor={plugins_dict.executors_info[nodeContent.kind]}
-                className="hub-item-icon"
-              />
-              <div className="hub-item-node-text">
-                {nodeContent.title}
-              </div>
-            </div>
-        }
-        </PluginsConsumer>
+        {renderHubItem(nodeContent)}
+
       </div>
     );
   }
+}
+
+export function renderHubItem(nodeContent) {
+  return (
+      <PluginsConsumer>
+      {
+          plugins_dict => <div className="hub-item hub-item-node">
+            <Icon
+              type_descriptor={plugins_dict.executors_info[nodeContent.kind]}
+              className="hub-item-icon"
+            />
+            <div className="hub-item-node-text">
+              {nodeContent.title}
+            </div>
+          </div>
+      }
+      </PluginsConsumer>
+  );
 }
 
 export default DragSource(ItemTypes.NODE_ITEM, nodeSource, (connect, monitor) => ({

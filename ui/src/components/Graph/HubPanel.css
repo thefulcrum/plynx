@@ -25,7 +25,6 @@
 }
 
 .hub-box-content {
-  color: #fff;
   background-color: #404040;
   border: 1px solid #202020;
   border-radius: 4px;
@@ -131,6 +130,7 @@
 }
 
 .hub-item {
+  color: #eee;
   padding: 5px;
   display: flex;
   font-weight: 600;
