@@ -92,7 +92,6 @@ export const NODE_RUNNING_STATUS = Object.freeze({
 });
 
 export const ACTIVE_NODE_RUNNING_STATUSES = Object.freeze(new Set([
-  NODE_RUNNING_STATUS.CREATED,
   NODE_RUNNING_STATUS.READY,
   NODE_RUNNING_STATUS.IN_QUEUE,
   NODE_RUNNING_STATUS.RUNNING,
@@ -224,3 +223,5 @@ export const REGISTER_USER_EXCEPTION_CODE = Object.freeze({
     username: 'Plese use 6 to 22 characters',
   },
 });
+
+export const DEFAULT_WORKFLOW_KIND = 'basic-dag-workflow';
