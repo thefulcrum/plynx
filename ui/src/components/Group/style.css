@@ -2,7 +2,12 @@
     width: 100%;
     height: 100%;
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
 
     background-color: #404040;
+}
+
+.group-main {
+    width: 100%;
+    background-color: #202020;
 }

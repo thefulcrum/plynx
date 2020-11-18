@@ -1,6 +1,9 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+import SortableTree from "react-sortable-tree";
+import { DropTarget } from 'react-dnd';
+import ItemTypes from '../../DragAndDropsItemTypes';
 
 
 // a little function to help us with reordering the result
@@ -12,19 +15,65 @@ const reorder = (list, startIndex, endIndex) => {
   return result;
 };
 
-export default class DirectoryColumn extends Component {
+// TODO unite with react_node_graph
+const getScrollOffset = () => {
+  const el = document.getElementsByClassName('GraphRoot')[0];
+  return {
+    x: el.scrollLeft,
+    y: el.scrollTop,
+  };
+};
+
+
+const boxTarget = {
+  drop(props, monitor, component) {     // eslint-disable-line no-unused-vars
+    const groupProps = props;
+    const blockObj = monitor.getItem();
+    const mousePos = monitor.getClientOffset();
+    console.log('c', blockObj);
+
+    if (groupProps.onDrop) {
+      // Hack: use GraphRoot scroll position
+      const offset = getScrollOffset();
+      groupProps.onDrop({
+        nodeContent: blockObj.nodeContent,
+        mousePos: {
+          x: mousePos.x + offset.x,
+          y: mousePos.y + offset.y,
+        },
+      });
+    }
+    return { name: 'ReactBlockGraph' };
+  },
+};
+
+function findError(treeDataChildren) {
+  console.log('findError', treeDataChildren);
+  if (!treeDataChildren) {
+      return false;
+  }
+  for (const treeData of treeDataChildren) {
+      if (treeData.children && treeData.children.length > 0) {
+        if (treeData.canExpand !== undefined && !treeData.canExpand) {
+            return true;
+        }
+        if (findError(treeData.children)) {
+            return true;
+        }
+      }
+  }
+  return false;
+}
+
+class DirectoryColumn extends Component {
   constructor(props) {
     super(props);
-    const self = this;
-    this.counter = 0;
-    props.items.forEach((obj) => {
-      obj._key = self.counter.toString();   // eslint-disable-line no-param-reassign
-      ++self.counter;
-    });
     this.state = {
-      items: props.items,
-      readOnly: this.props.readOnly
+      treeData: props.treeData,
+      readOnly: false
     };
+    console.log('props', this.props);
+
     this.onDragEnd = this.onDragEnd.bind(this);
   }
 
@@ -46,6 +95,14 @@ export default class DirectoryColumn extends Component {
     // this.props.onChanged(items);
   }
 
+  handleChangeTree(treeData) {
+    console.log(treeData);
+    //this.setState({ treeData });
+    if (!findError(treeData)) {
+      this.setState({ treeData });
+    }
+  }
+
   handleChanged(index, name, value) {
     const items = this.state.items;
     items[index][name] = value;
@@ -63,38 +120,23 @@ export default class DirectoryColumn extends Component {
   // Normally you would want to split things out into separate components.
   // But in this example everything is just done in one place for simplicity
   render() {
-    return (
-      <div className='InOutList'>
-        <DragDropContext onDragEnd={this.onDragEnd}>
-          <Droppable droppableId="droppable" isDropDisabled={this.state.readOnly}>
-            {(provided, snapshot) => (
-              <div className={'InOutListBackground' + (snapshot.isDraggingOver ? ' InOutListBackgroundDragging' : '')}
-                ref={provided.innerRef}
-              >
-              {this.state.items.map((item, index) => (
-                <Draggable key={item._id} draggableId={item._id} index={index} isDragDisabled={false}>
-                  {(provided, snapshot) => (      // eslint-disable-line no-shadow
-                    <div>
-                      <div className={'InOutDiv' + (snapshot.isDragging ? ' InOutDivDragging' : '')}
-                        ref={provided.innerRef}
-                        {...provided.draggableProps}
-                        {...provided.dragHandleProps}
-                      >
-                          <div className="drag-class">
-                          {item.title}
-                          </div>
-                      </div>
-                      {provided.placeholder}
-                    </div>
-                  )}
-                </Draggable>
-              ))}
-              {provided.placeholder}
-            </div>
-          )}
-          </Droppable>
-        </DragDropContext>
+    const { connectDropTarget } = this.props;
+
+    return connectDropTarget(
+      <div className='group-main'>
+          <SortableTree
+            treeData={this.state.treeData}
+            onChange={(treeData) => this.handleChangeTree(treeData)}
+              //theme={FileExplorerTheme}
+             className="group-directory"
+          />
       </div>
     );
   }
 }
+
+export default DropTarget(ItemTypes.NODE_ITEM, boxTarget, (connect, monitor) => ({
+  connectDropTarget: connect.dropTarget(),
+  isOver: monitor.isOver(),
+  canDrop: monitor.canDrop(),
+}))(DirectoryColumn);

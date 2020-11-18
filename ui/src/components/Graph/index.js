@@ -10,7 +10,6 @@ import cookie from 'react-cookies';
 import HubPanel from './HubPanel';
 import PreviewDialog from '../Dialogs/PreviewDialog';
 import PropertiesBar from './PropertiesBar';
-import withDragDropContext from './withDragDropContext';
 import FileDialog from '../Dialogs/FileDialog';
 import CodeDialog from '../Dialogs/CodeDialog';
 import ParameterSelectionDialog from '../Dialogs/ParameterSelectionDialog';
@@ -937,4 +936,4 @@ ENDPOINT = '` + API_ENDPOINT + `'
 }
 
 
-export default withDragDropContext(Graph);
+export default Graph;

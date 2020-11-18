@@ -10,6 +10,12 @@ import CacheBuster from './CacheBuster';
 import { UserMenuContextProvider } from './contexts';
 import { COLLECTIONS, VIRTUAL_COLLECTIONS, SPECIAL_USERS } from './constants';
 
+import {DragDropContext} from 'react-dnd';
+import { isMobile } from "react-device-detect";
+import {TouchBackend} from 'react-dnd-touch-backend';
+import {HTML5Backend} from 'react-dnd-html5-backend';
+import { DndProvider } from 'react-dnd';
+
 import Editor from './components/Editor';
 import UserView from './components/UserView';
 import Group from './components/Group';
@@ -73,26 +79,28 @@ class App extends Component {
               <UserMenuContextProvider>
                 <Header />
                 <div className="Content">
-                  <Switch>
-                    <Route exact path="/" render={(props) => <LogInRedirect {...props} specialUser={SPECIAL_USERS.DEFAULT} maxTry={6} />}/>
-                    <Route exact path="/demo" render={(props) => <LogInRedirect {...props} specialUser={SPECIAL_USERS.DEMO} maxTry={3} />}/>
-                    <Route exact path="/dashboard" component={Dashboard} />
-                    <Route exact path="/login" component={LogIn} />
+                  <DndProvider backend={isMobile ? TouchBackend : HTML5Backend}>
+                      <Switch>
+                        <Route exact path="/" render={(props) => <LogInRedirect {...props} specialUser={SPECIAL_USERS.DEFAULT} maxTry={6} />}/>
+                        <Route exact path="/demo" render={(props) => <LogInRedirect {...props} specialUser={SPECIAL_USERS.DEMO} maxTry={3} />}/>
+                        <Route exact path="/dashboard" component={Dashboard} />
+                        <Route exact path="/login" component={LogIn} />
 
-                    <Route exact path={`/${VIRTUAL_COLLECTIONS.OPERATIONS}`} component={OperationList}/>
-                    <Route exact path={`/${VIRTUAL_COLLECTIONS.WORKFLOWS}`} component={WorkflowList}/>
-                    <Route exact path={`/${VIRTUAL_COLLECTIONS.RUNS}`} render={(props) => <RunList {...props} showControlls />}/>
-                    <Route exact path={`/${VIRTUAL_COLLECTIONS.GROUPS}`} render={(props) => <GroupList {...props} showControlls />}/>
-                    <Route exact path={`/${COLLECTIONS.USERS}`} render={(props) => <RunList {...props} showControlls />}/>
+                        <Route exact path={`/${VIRTUAL_COLLECTIONS.OPERATIONS}`} component={OperationList}/>
+                        <Route exact path={`/${VIRTUAL_COLLECTIONS.WORKFLOWS}`} component={WorkflowList}/>
+                        <Route exact path={`/${VIRTUAL_COLLECTIONS.RUNS}`} render={(props) => <RunList {...props} showControlls />}/>
+                        <Route exact path={`/${VIRTUAL_COLLECTIONS.GROUPS}`} render={(props) => <GroupList {...props} showControlls />}/>
+                        <Route exact path={`/${COLLECTIONS.USERS}`} render={(props) => <RunList {...props} showControlls />}/>
 
-                    <Route path={`/${COLLECTIONS.TEMPLATES}/:node_id`} render={(props) => <Editor {...props} collection={COLLECTIONS.TEMPLATES} />} />
-                    <Route path={`/${COLLECTIONS.RUNS}/:node_id`} render={(props) => <Editor {...props} collection={COLLECTIONS.RUNS} />} />
-                    <Route path={`/${COLLECTIONS.GROUPS}/:group_id`} render={(props) => <Group {...props} collection={COLLECTIONS.GROUPS} />} />
-                    <Route path={`/${COLLECTIONS.USERS}/:username`} render={(props) => <UserView {...props} />} />
+                        <Route path={`/${COLLECTIONS.TEMPLATES}/:node_id`} render={(props) => <Editor {...props} collection={COLLECTIONS.TEMPLATES} />} />
+                        <Route path={`/${COLLECTIONS.RUNS}/:node_id`} render={(props) => <Editor {...props} collection={COLLECTIONS.RUNS} />} />
+                        <Route path={`/${COLLECTIONS.GROUPS}/:group_id`} render={(props) => <Group {...props} collection={COLLECTIONS.GROUPS} />} />
+                        <Route path={`/${COLLECTIONS.USERS}/:username`} render={(props) => <UserView {...props} />} />
 
-                    <Route path="/permission_denied" render={(props) => <ErrorPage {...props} errorCode={403} />} />
-                    <Route path="*" render={(props) => <ErrorPage {...props} errorCode={404} />} />
-                  </Switch>
+                        <Route path="/permission_denied" render={(props) => <ErrorPage {...props} errorCode={403} />} />
+                        <Route path="*" render={(props) => <ErrorPage {...props} errorCode={404} />} />
+                      </Switch>
+                  </DndProvider>
                 </div>
               </UserMenuContextProvider>
             </div>
