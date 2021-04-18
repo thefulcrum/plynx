@@ -38,7 +38,7 @@ export function renderNodeItem(hrefPrefix, statusName) {
                   className="operation-icon"
                 />
                 <div className="operation-title-text">
-                  {plugins_dict.executors_info[node.kind].title}
+                  {(plugins_dict.executors_info[node.kind] ?? {title: 'Unknown Operation'}).title}
                 </div>
             </div>
             { listTextElement('Author', getAuthorText(node)) }

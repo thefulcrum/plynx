@@ -36,7 +36,14 @@ const RenderIcon = ({ family, name, ...props }) => {
 };
 
 export default function icon(props) {
-  const {type_descriptor} = props;
+  let {type_descriptor} = props;
+  if (!type_descriptor) {
+      console.error('"type_descriptor" is not a defined');
+      type_descriptor = {
+          icon: 'feathericons.alert-circle',
+          color: '#f00',
+      }
+  }
   const icon_descriptor = type_descriptor.icon.split('.');
   let icon_family;
   let icon_name;

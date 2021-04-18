@@ -57,9 +57,11 @@ export default class InOutList extends Component {
   handleAddItem() {
     const items = this.state.items;
 
+    const defaultType = this.props.operation_dict.resources[0].kind;
+
     items.push({
-      name: 'file_' + this.counter,
-      file_type: 'file',
+      name: `item_${this.counter}`,
+      file_type: defaultType,
       values: [],
       min_count: 1,
       is_array: false,
@@ -160,6 +162,9 @@ InOutList.propTypes = {
   varName: PropTypes.string,
   nodeKind: PropTypes.string,
   items: PropTypes.array,
+  operation_dict: PropTypes.shape({
+    resources: PropTypes.array,
+  }),
   readOnly: PropTypes.bool,
   onChanged: PropTypes.func,
   onPreview: PropTypes.func.isRequired,

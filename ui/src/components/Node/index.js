@@ -139,57 +139,63 @@ export default class Node extends Component {
              }
             </PluginsConsumer>
           </div>
-          <div className='EditNodeComponents'>
 
-            <div className='EditNodeColumn EditNodeInputs'>
-              <div className='EditNodePropTitle'>
-                Inputs
-              </div>
-              <div className='EditNodeList'>
-                <InOutList
-                  varName='inputs'
-                  items={node.inputs}
-                  key={key}
-                  nodeKind={node.kind}
-                  onChanged={(value) => this.handleParameterChanged('inputs', value)}
-                  readOnly={this.state.readOnly || this.state.is_workflow}
-                  onPreview={(previewData) => this.handlePreview(previewData)}
-                />
-              </div>
-            </div>
+          <PluginsConsumer>
+          { plugins_dict => <div className='EditNodeComponents'>
 
-            <div className='EditNodeColumn EditNodeParameters'>
-              <div className='EditNodePropTitle'>
-                Parameters
-              </div>
-              <div className='EditNodeList'>
-                <ParameterList
-                  items={node.parameters}
-                  key={key}
-                  onChanged={(value) => this.handleParameterChanged('parameters', value)}
-                  readOnly={this.state.readOnly}
-                />
-              </div>
-            </div>
+                <div className='EditNodeColumn EditNodeInputs'>
+                  <div className='EditNodePropTitle'>
+                    Inputs
+                  </div>
+                  <div className='EditNodeList'>
+                    <InOutList
+                      varName='inputs'
+                      items={node.inputs}
+                      key={key}
+                      nodeKind={node.kind}
+                      onChanged={(value) => this.handleParameterChanged('inputs', value)}
+                      readOnly={this.state.readOnly || this.state.is_workflow}
+                      onPreview={(previewData) => this.handlePreview(previewData)}
+                      operation_dict={plugins_dict.operations_dict[node.kind]}
+                    />
+                  </div>
+                </div>
 
-            <div className='EditNodeColumn EditNodeOutputs'>
-              <div className='EditNodePropTitle'>
-                Outputs
-              </div>
-              <div className='EditNodeList'>
-                <InOutList
-                  varName='outputs'
-                  items={node.outputs}
-                  key={key}
-                  nodeKind={node.kind}
-                  onChanged={(value) => this.handleParameterChanged('outputs', value)}
-                  readOnly={this.state.readOnly || this.state.is_workflow}
-                  onPreview={(previewData) => this.handlePreview(previewData)}
-                />
-              </div>
-            </div>
+                <div className='EditNodeColumn EditNodeParameters'>
+                  <div className='EditNodePropTitle'>
+                    Parameters
+                  </div>
+                  <div className='EditNodeList'>
+                    <ParameterList
+                      items={node.parameters}
+                      key={key}
+                      onChanged={(value) => this.handleParameterChanged('parameters', value)}
+                      readOnly={this.state.readOnly}
+                    />
+                  </div>
+                </div>
 
-          </div>
+                <div className='EditNodeColumn EditNodeOutputs'>
+                  <div className='EditNodePropTitle'>
+                    Outputs
+                  </div>
+                  <div className='EditNodeList'>
+                    <InOutList
+                      varName='outputs'
+                      items={node.outputs}
+                      key={key}
+                      nodeKind={node.kind}
+                      onChanged={(value) => this.handleParameterChanged('outputs', value)}
+                      readOnly={this.state.readOnly || this.state.is_workflow}
+                      onPreview={(previewData) => this.handlePreview(previewData)}
+                      operation_dict={plugins_dict.operations_dict[node.kind]}
+                    />
+                  </div>
+                </div>
+
+              </div>
+          }
+          </PluginsConsumer>
         </PluginsProvider>
       </HotKeys>
     );
