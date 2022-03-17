@@ -97,6 +97,7 @@ def get_nodes(collection, node_link=None):
             })
     elif node_link in workflow_manager.kind_to_workflow_dict and collection == Collections.GROUPS:
         # TODO move group to a separate class
+        # TODO remove Groups
         group_dict = Group().to_dict()
         group_dict['kind'] = node_link
         return make_success_response({
@@ -210,7 +211,8 @@ def post_node(collection):
             return make_fail_response('Invalid action for an operation'), 400
         if node.node_status != NodeStatus.CREATED:
             return make_fail_response('Node status `{}` expected. Found `{}`'.format(NodeStatus.CREATED, node.node_status))
-        validation_error = executor_manager.kind_to_executor_class[node.kind](node).validate()
+        executor = executor_manager.kind_to_executor_class[node.kind](node)
+        validation_error = executor.validate()
         if validation_error:
             return make_success_response({
                 'status': NodePostStatus.VALIDATION_FAILED,
@@ -224,6 +226,9 @@ def post_node(collection):
             node.save(collection=Collections.RUNS)
         else:
             return make_permission_denied('You do not have CAN_RUN_WORKFLOWS role')
+
+        if hasattr(node, "launch"):
+            executor.launch()
 
         return make_success_response({
                 'status': NodePostStatus.SUCCESS,

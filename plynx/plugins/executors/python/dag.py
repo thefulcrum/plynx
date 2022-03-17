@@ -207,3 +207,42 @@ class DAG(plynx.plugins.executors.dag.DAG):
         logging.warn("Received kill request")
         self._node_running_status = NodeRunningStatus.CANCELED
         self.worker_pool.terminate()
+
+    def launch(self):
+        """
+        TMP DO NOT COMMIT
+        """
+        try:
+            try:
+                status = NodeRunningStatus.FAILED
+                status = self.run()
+            except Exception:
+                try:
+                    f = six.BytesIO()
+                    f.write(traceback.format_exc().encode())
+                    executor.node.get_log_by_name('worker').resource_id = upload_file_stream(f)
+                    logging.error(traceback.format_exc())
+                except Exception:
+                    # This case of `except` has happened before due to I/O failure
+                    logging.critical(traceback.format_exc())
+                    raise
+            finally:
+                executor.clean_up()
+
+            logging.info('Node {node_id} `{title}` finished with status `{status}`'.format(
+                node_id=executor.node._id,
+                title=executor.node.title,
+                status=status,
+                ))
+            executor.node.node_running_status = status
+            if executor.node._id in self._killed_run_ids:
+                self._killed_run_ids.remove(executor.node._id)
+        except Exception as e:
+            logging.warning('Execution failed: {}'.format(e))
+            executor.node.node_running_status = NodeRunningStatus.FAILED
+        finally:
+            with executor._lock:
+                self.node.save(collection=Collections.RUNS)
+            with self._run_id_to_executor_lock:
+                del self._run_id_to_executor[executor.node._id]
+        self.run()
