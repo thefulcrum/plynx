@@ -212,10 +212,14 @@ class DAG(plynx.plugins.executors.dag.DAG):
         """
         TMP DO NOT COMMIT
         """
+        logging.warn("!" * 100)
+        executor = self
         try:
             try:
                 status = NodeRunningStatus.FAILED
+                logging.warn("!!! Start")
                 status = self.run()
+                logging.warn("!!! Start 2")
             except Exception:
                 try:
                     f = six.BytesIO()
@@ -235,14 +239,19 @@ class DAG(plynx.plugins.executors.dag.DAG):
                 status=status,
                 ))
             executor.node.node_running_status = status
-            if executor.node._id in self._killed_run_ids:
-                self._killed_run_ids.remove(executor.node._id)
+            #if executor.node._id in self._killed_run_ids:
+            #    self._killed_run_ids.remove(executor.node._id)
         except Exception as e:
             logging.warning('Execution failed: {}'.format(e))
             executor.node.node_running_status = NodeRunningStatus.FAILED
         finally:
-            with executor._lock:
-                self.node.save(collection=Collections.RUNS)
-            with self._run_id_to_executor_lock:
-                del self._run_id_to_executor[executor.node._id]
-        self.run()
+            # with executor._lock:
+            #     self.node.save(collection=Collections.RUNS)
+            # with self._run_id_to_executor_lock:
+            #     del self._run_id_to_executor[executor.node._id]
+            self.node.save(collection=Collections.RUNS)
+            logging.warn(f"!!! end {executor.node.node_running_status}")
+
+        #self.run()
+
+        self.node.save(collection=Collections.RUNS)

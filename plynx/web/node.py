@@ -211,6 +211,10 @@ def post_node(collection):
             return make_fail_response('Invalid action for an operation'), 400
         if node.node_status != NodeStatus.CREATED:
             return make_fail_response('Node status `{}` expected. Found `{}`'.format(NodeStatus.CREATED, node.node_status))
+
+        node = node.clone(NodeClonePolicy.NODE_TO_RUN)
+        node.author = g.user._id
+
         executor = executor_manager.kind_to_executor_class[node.kind](node)
         validation_error = executor.validate()
         if validation_error:
@@ -220,14 +224,12 @@ def post_node(collection):
                 'validation_error': validation_error.to_dict()
             })
 
-        node = node.clone(NodeClonePolicy.NODE_TO_RUN)
-        node.author = g.user._id
         if is_admin or can_run_workflows:
             node.save(collection=Collections.RUNS)
         else:
             return make_permission_denied('You do not have CAN_RUN_WORKFLOWS role')
 
-        if hasattr(node, "launch"):
+        if hasattr(executor, "launch"):
             executor.launch()
 
         return make_success_response({
