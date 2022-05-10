@@ -1,0 +1,18 @@
+
+celery:
+  celery_broker_url: redis://redis:6379
+  celery_result_backend: redis://redis:6379
+  celery_track_started: True
+  celery_send_events: True
+
+
+  port: 27017
+config = {
+    "CELERY_BROKER_URL": "redis://redis:6379",
+    "CELERY_RESULT_BACKEND": "redis://redis:6379",
+    "CELERY_TRACK_STARTED": True,
+    "CELERY_SEND_EVENTS": True
+}
+
+celery =  Celery("plynx", broker="redis://redis:6379")
+celery.conf.update(config)
