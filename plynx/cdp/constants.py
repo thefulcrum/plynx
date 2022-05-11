@@ -43,5 +43,17 @@ class NodeTypes:
 
 
 class WorkflowTypes:
+    """Workflow types"""
+
     SCHEDULE = "Schedule"
     ON_DEMAND = "OnDemand"
+
+
+class StreamDataFields:
+    """Stream data fields."""
+
+    DATA_SOURCE = "data_source"
+    INSTANCE_NAME = "instance_name"
+    TOPIC = "topic"
+    PAYLOAD = "payload"
+    STREAM_QUEUE_ID = "stream_queue_id"

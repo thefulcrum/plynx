@@ -6,7 +6,7 @@ from sqlalchemy import create_engine
 
 import plynx.node
 from plynx.cdp.utils import send_celery_task
-from plynx.cdp.constants import DataSource
+from plynx.cdp.constants import DataSource, StreamDataFields
 
 from plynx.constants import Collections
 
@@ -19,11 +19,11 @@ hubdb_connection = create_engine(
 
 @plynx.node.output(name="output", var_type=dict)
 @plynx.node.param(
-    name="data_source", var_type=str, default=None
+    name=StreamDataFields.DATA_SOURCE, var_type=str, default=None
 )  # TODO make a new decorator for this
-@plynx.node.param(name="instance_name", var_type=str)
-@plynx.node.param(name="topic", var_type=str)
-@plynx.node.param(name="payload", var_type=str, default=None)
+@plynx.node.param(name=StreamDataFields.INSTANCE_NAME, var_type=str)
+@plynx.node.param(name=StreamDataFields.TOPIC, var_type=str)
+@plynx.node.param(name=StreamDataFields.PAYLOAD, var_type=str, default=None)
 @plynx.node.operation(
     title="Stream Data Consumer",
     description="Receive stream data of specified topic from specified instance.",
@@ -46,10 +46,10 @@ def stream_processor(data_source, instance_name, topic, payload):
 
     return {
         "output": {
-            "data_source": data_source,
-            "instance_name": instance_name,
-            "topic": topic,
-            "payload": payload,
+            StreamDataFields.DATA_SOURCE: data_source,
+            StreamDataFields.INSTANCE_NAME: instance_name,
+            StreamDataFields.TOPIC: topic,
+            StreamDataFields.PAYLOAD: payload,
         }
     }
 

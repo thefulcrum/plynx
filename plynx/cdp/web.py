@@ -6,10 +6,7 @@ from http import HTTPStatus
 
 from flask import request, Blueprint
 
-# from plynx.web.common import (
-#     make_fail_response,
-#     make_success_response,
-# )
+from plynx.cdp import get_logger
 from plynx.cdp.data import EventMessage
 from plynx.cdp.constants import WebhookEvents
 from plynx.cdp.handlers import RunWorkflowHandler, StreamDataHandler
@@ -35,7 +32,7 @@ def webhook():
             "topic": "xxxxx",
             "payload: "xxxxx",
             "stream_queue_id": "xxxxx",
-            "stream_instance_name": xxxxx"
+            "instance_name": xxxxx"
         }
     }
     """
@@ -44,10 +41,11 @@ def webhook():
         WebhookEvents.RUN_WORKFLOW_EVENT: RunWorkflowHandler,
         WebhookEvents.PROCESS_STREAM_EVENT: StreamDataHandler,
     }
+    logger = get_logger()
 
     if request.method == "POST":
         payload = json.loads(request.data)
-        # logger.info(f"Received stream data payload: {payload}.")
+        logger.info(f"Received stream data payload: {payload}.")
 
         event, message = payload.get("event"), payload.get("message")
         try:

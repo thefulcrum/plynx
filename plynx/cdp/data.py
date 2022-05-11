@@ -10,12 +10,9 @@ from plynx.db.node import Node
 from plynx.cdp.validators import check_empty
 
 
-class WorkflowNode(Node):
-    """Dedicated class for workflow"""
-
-
-class OperationNode(Node):
-    """Dedicated class for operation"""
+# Alias Node class
+WorkflowNode = Node
+OperationNode = Node
 
 
 @dataclass(frozen=True)
@@ -24,13 +21,13 @@ class StreamData:
     topic: str
     payload: str
     stream_queue_id: str
-    stream_instance_name: str
+    instance_name: str
 
     # validators
     _check_topic = validator("topic", allow_reuse=True)(check_empty)
     _check_payload = validator("payload", allow_reuse=True)(check_empty)
     _check_stream_queue_id = validator("stream_queue_id", allow_reuse=True)(check_empty)
-    _check_stream_instance_name = validator("stream_instance_name", allow_reuse=True)(
+    _check_instance_name = validator("instance_name", allow_reuse=True)(
         check_empty
     )
 

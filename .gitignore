@@ -16,3 +16,4 @@ venv
 ui/report.20200526.173030.25.0.001.json
 .idea
 .vscode
+__pycache__
