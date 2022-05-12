@@ -1,0 +1,3 @@
+[submodule "plynx/hub-plynx"]
+	path = plynx/hub-plynx
+	url = git@github.com:thefulcrum/hub-plynx.git
