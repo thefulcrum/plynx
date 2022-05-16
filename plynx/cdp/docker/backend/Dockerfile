@@ -30,4 +30,4 @@ COPY ./scripts/watch.sh /app/watch.sh
 RUN pip install -r /app/requirements.txt
 RUN pip install -r /app/requirements-dev.txt
 RUN pip install -r /app/docker/backend/requirements.txt
-RUN pip install -r /app/plynx/cdp/requirements-cdp.txt
+RUN pip install -r /app/plynx/cdp/requirements.txt

@@ -17,10 +17,8 @@ from plynx.utils.config import get_config
 from plynx.utils.content import create_default_templates
 from plynx.utils.db_connector import check_connection
 from plynx.utils.exceptions import RegisterUserException
-from plynx.cdp.web import cdp_bp
 
 app = Flask(__name__)
-app.register_blueprint(cdp_bp)
 logger = create_logger(app)
 
 DEFAULT_EMAIL = ''

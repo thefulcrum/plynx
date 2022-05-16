@@ -7,7 +7,7 @@ from pydantic import validator
 from pydantic.dataclasses import dataclass
 
 from plynx.db.node import Node
-from plynx.cdp.validators import check_empty
+from plynx.cdp.src.utils.validators import check_empty
 
 
 # Alias Node class
@@ -17,6 +17,8 @@ OperationNode = Node
 
 @dataclass(frozen=True)
 class StreamData:
+    """Stream data schema."""
+
     # fields
     topic: str
     payload: str
@@ -34,6 +36,8 @@ class StreamData:
 
 @dataclass(frozen=True)
 class EventMessage:
+    """Event message schema."""
+
     # fields
     data: Dict[str, Any]
 

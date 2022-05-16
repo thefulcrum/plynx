@@ -3,6 +3,7 @@
 
 
 class CeleryTask:
+    """Celery task name and queue name used for processing tasks."""
 
     TASK_NAME = "scheduler_task_dispatcher"
     QUEUE_NAME = "scheduler_task_dispatcher_queue"
@@ -38,6 +39,8 @@ class WebhookEvents:
 
 
 class NodeTypes:
+    """Node types used for filtering data."""
+
     PYTHON_WORKFLOW = "python-workflow"
     PYTHON_CODE_OPERATION = "python-code-operation"
 

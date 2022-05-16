@@ -2,20 +2,23 @@
 # All rights reserved.
 
 import json
+import logging
 from http import HTTPStatus
 
-from flask import request, Blueprint
+from flask import request
 
-from plynx.cdp import get_logger
-from plynx.cdp.data import EventMessage
-from plynx.cdp.constants import WebhookEvents
-from plynx.cdp.handlers import RunWorkflowHandler, StreamDataHandler
-
-cdp_bp = Blueprint("cdp", __name__, url_prefix="/plynx/api/cdp")
+from plynx.web.common import app, requires_auth, handle_errors
+from plynx.cdp.src.data import EventMessage
+from plynx.cdp.src.constants import WebhookEvents
+from plynx.cdp.src.handlers import RunWorkflowHandler, StreamDataHandler
 
 
-@cdp_bp.route("/webhook", methods=("POST",))
-# @requires_auth
+logger = logging.getLogger(__name__)
+
+# @cdp_bp.route("/webhook", methods=("POST",))
+@app.route("/cdp/webhook", methods=("POST",))
+@handle_errors
+@requires_auth
 def webhook():
     """Receive the webhook message to notify the listeners.
 
@@ -41,7 +44,6 @@ def webhook():
         WebhookEvents.RUN_WORKFLOW_EVENT: RunWorkflowHandler,
         WebhookEvents.PROCESS_STREAM_EVENT: StreamDataHandler,
     }
-    logger = get_logger()
 
     if request.method == "POST":
         payload = json.loads(request.data)
