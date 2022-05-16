@@ -113,7 +113,6 @@ class StreamDataHandler(WebHookHandler):
             operations: List[OperationNode] = ops_node.value.value
             for op in operations:
 
-                payload_updated = False
                 op_params: List[Parameter] = op.parameters
 
                 for p in op_params:
@@ -121,9 +120,6 @@ class StreamDataHandler(WebHookHandler):
                         self.logger.info("Updating payload data with stream message.")
 
                         p.value = self.stream_data.payload
-                        payload_updated = True
-
-                    if payload_updated:
                         break
 
             self.logger.info("Saving the workflow in `runs` collection for execution.")
