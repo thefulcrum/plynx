@@ -1,3 +1,3 @@
-[submodule "plynx/hub-plynx"]
-	path = plynx/hub-plynx
+[submodule "plynx/cdp"]
+	path = plynx/cdp
 	url = git@github.com:thefulcrum/hub-plynx.git
