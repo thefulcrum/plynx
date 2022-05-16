@@ -246,6 +246,3 @@ def _init_config():
 
 
 _init_config()
-
-
-#! TODO add cdp config
