@@ -35,3 +35,7 @@ dev:
 build_package:
 	python setup.py sdist
 	python setup.py bdist_wheel
+
+build_for_n3:
+	mkdir -p ./data/resources
+	PLYNX_IMAGES="backend ui" ./plynx/cdp/scripts/build_images.sh
