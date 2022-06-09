@@ -194,7 +194,7 @@ def post_node(collection: str):
 
                     add_celery_periodic_task(str(node._id), node.schedule)
                 else:
-                    delete_celery_periodic_task(node._id)
+                    delete_celery_periodic_task(str(node._id))
 
         else:
             return make_permission_denied('Only the owners or users with CAN_MODIFY_OTHERS_WORKFLOWS role can save it')
