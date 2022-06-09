@@ -38,6 +38,11 @@ export default class PropertiesBar extends Component {
     this.mainNodeId = props.initialNode._id;
   }
 
+  /**
+   * Add schedule parameter if the node is a workflow kind.
+   * @param {*} nodes
+   * @param {*} parameters
+   */
   addScheduleParameter(nodes, parameters) {
 
     if (nodes.every(node => WORKFLOW_KINDS.includes(node.kind) && "schedule" in node)) {

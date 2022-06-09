@@ -9,7 +9,7 @@ import bson.objectid
 from flask import g, request
 from croniter import croniter
 
-from hubcommon.v1.celery.beat.models.periodictask import PeriodicTask
+from hubcommon.v1.support.exceptions.messages import INVALID_CRONTAB_EXPRESSION
 
 import plynx.base.hub
 import plynx.db.node_collection_manager
@@ -188,7 +188,7 @@ def post_node(collection: str):
                 if node.schedule:
                     if not croniter.is_valid(node.schedule):
                         return (
-                            make_fail_response("Invalid crontab expression found for the schedule."),
+                            make_fail_response(INVALID_CRONTAB_EXPRESSION),
                             HTTPStatus.BAD_REQUEST
                         )
 
