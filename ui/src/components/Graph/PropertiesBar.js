@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import OutputItem from './OutputItem';
 import ParameterItem from '../Common/ParameterItem';
 import makePropertiesBox from '../Common/makePropertiesBox';
-import { COLLECTIONS, IAM_POLICIES } from '../../constants';
+import { COLLECTIONS, IAM_POLICIES, WORKFLOW_KINDS } from '../../constants';
 import './style.css';
 
 
@@ -16,7 +16,7 @@ const renderLinkRow = (title, href, text) => {
     <div className='ParameterItem'
       key={href + text}>
       <div className='ParameterNameCell'>
-          {title}
+        {title}
       </div>
       <div className='ParameterValueCell'>
         <a href={href}>
@@ -38,6 +38,20 @@ export default class PropertiesBar extends Component {
     this.mainNodeId = props.initialNode._id;
   }
 
+  addScheduleParameter(nodes, parameters) {
+
+    if (nodes.every(node => WORKFLOW_KINDS.includes(node.kind) && "schedule" in node)) {
+
+      parameters.unshift({
+        name: "_SCHEDULE",
+        widget: "Schedule",
+        value: nodes[0].schedule,
+        parameter_type: "str",
+        _link_visibility: false,
+      });
+    }
+  }
+
   getStateDict(nodes) {
     const commonParameters = JSON.parse(JSON.stringify(nodes.length > 0 ? nodes[0].parameters : []));
     let ii,
@@ -48,12 +62,12 @@ export default class PropertiesBar extends Component {
         const commonParam = commonParameters[jj];
         if (!nodes[ii].parameters.find(param => {
           return param.name === commonParam.name && param.parameter_type === commonParam.parameter_type &&
-                    (
-                        (param.reference === null && param.value === commonParam.value) ||
-                        (param.reference && param.reference === commonParam.reference)
-                    );
+            (
+              (param.reference === null && param.value === commonParam.value) ||
+              (param.reference && param.reference === commonParam.reference)
+            );
         })
-              ) {
+        ) {
           indexesToRemove.push(jj);
         }
       }
@@ -61,6 +75,10 @@ export default class PropertiesBar extends Component {
         commonParameters.splice(indexesToRemove.pop(), 1);
       }
     }
+
+    // this only applies on workflow level
+    this.addScheduleParameter(nodes, commonParameters);
+
     if (allEqual(nodes.map(node => node.description))) {
       commonParameters.unshift({
         name: '_DESCRIPTION',
@@ -73,7 +91,7 @@ export default class PropertiesBar extends Component {
     if (allEqual(nodes.map(node => node.title))) {
       commonParameters.unshift({
         name: '_TITLE',
-        widget: 'title',
+        widget: 'Title',
         value: nodes[0].title,
         parameter_type: 'str',
         _link_visibility: false,
@@ -119,20 +137,20 @@ export default class PropertiesBar extends Component {
 
   renderOutputs(outputs) {
     return outputs.filter(
-        (output) => {
-          return output.values.length > 0;
+      (output) => {
+        return output.values.length > 0;
+      }
+    ).map(
+      (output) => output.values.map(
+        (output_value) => {
+          return <OutputItem
+            item={output}
+            key={output_value}
+            onPreview={(previewData) => this.handlePreview(previewData)}
+          />;
         }
-      ).map(
-        (output) => output.values.map(
-            (output_value) => {
-              return <OutputItem
-                item={output}
-                key={output_value}
-                onPreview={(previewData) => this.handlePreview(previewData)}
-                />;
-            }
-        )
-      );
+      )
+    );
   }
 
   render() {
@@ -163,18 +181,18 @@ export default class PropertiesBar extends Component {
           return parameter.widget !== null;
         }
       )
-      .map(
-        (parameter) => <ParameterItem
-          name={parameter.name}
-          widget={parameter.widget}
-          value={parameter.value}
-          parameterType={parameter.parameter_type}
-          key={this.state.nodeId + "$" + parameter.name + parameter.reference}
-          readOnly={!this.state.editable}
-          _link_visibility={parameter.hasOwnProperty('_link_visibility') ? parameter._link_visibility : (self.mainNodeId !== this.state.nodes[0]._id)}
-          reference={parameter.reference}
-          onParameterChanged={(name, value) => this.handleParameterChanged(name, value)}
-          onLinkClick={(name) => this.handleLinkClick(name)}
+        .map(
+          (parameter) => <ParameterItem
+            name={parameter.name}
+            widget={parameter.widget}
+            value={parameter.value}
+            parameterType={parameter.parameter_type}
+            key={this.state.nodeId + "$" + parameter.name + parameter.reference}
+            readOnly={!this.state.editable}
+            _link_visibility={parameter.hasOwnProperty('_link_visibility') ? parameter._link_visibility : (self.mainNodeId !== this.state.nodes[0]._id)}
+            reference={parameter.reference}
+            onParameterChanged={(name, value) => this.handleParameterChanged(name, value)}
+            onLinkClick={(name) => this.handleLinkClick(name)}
           />);
     }
     const outputsList = this.renderOutputs(this.state.outputs);
@@ -188,18 +206,18 @@ export default class PropertiesBar extends Component {
         onMouseDown={(e) => {
           e.stopPropagation();
         }}
-        >
+      >
         {
-            this.state.nodes.length > 1 &&
-            <div className="PropertiesHeader">
-                {'Properties of ' + this.state.nodes.length + ' nodes'}
-            </div>
+          this.state.nodes.length > 1 &&
+          <div className="PropertiesHeader">
+            {'Properties of ' + this.state.nodes.length + ' nodes'}
+          </div>
         }
         {
-            this.state.nodes.length === 1 &&
-            <div className="PropertiesHeader">
-                {`Properties of ${this.state.nodes[0].title}`}
-            </div>
+          this.state.nodes.length === 1 &&
+          <div className="PropertiesHeader">
+            {`Properties of ${this.state.nodes[0].title}`}
+          </div>
         }
         {
           (this.state.nodeId && this.state.base_node_name === 'file') &&

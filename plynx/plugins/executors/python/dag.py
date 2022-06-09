@@ -237,3 +237,11 @@ class DAG(plynx.plugins.executors.dag.DAG):
         logging.info("Received kill request")
         self._node_running_status = NodeRunningStatus.CANCELED
         self.worker_pool.terminate()
+
+    @classmethod
+    def get_default_node(cls, is_workflow: bool) -> Node:
+        """Get the default node with a schedule example."""
+
+        node = super().get_default_node(is_workflow)
+        node.schedule = "eg. 5 4 * * *"
+        return node

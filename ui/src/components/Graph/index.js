@@ -14,8 +14,8 @@ import withDragDropContext from './withDragDropContext';
 import FileDialog from '../Dialogs/FileDialog';
 import CodeDialog from '../Dialogs/CodeDialog';
 import ParameterSelectionDialog from '../Dialogs/ParameterSelectionDialog';
-import {ObjectID} from 'bson';
-import {HotKeys} from 'react-hotkeys';
+import { ObjectID } from 'bson';
+import { HotKeys } from 'react-hotkeys';
 import {
   VALIDATION_CODES,
   NODE_RUNNING_STATUS,
@@ -46,34 +46,34 @@ const TOUR_STEPS = [
   {
     selector: '.NodeItem',
     content: 'Plynx is an open modular platform. Each Operaion represents an executable code or function, business logic, transformation, etc. ' +
-        'They can be defined eigher by users, admins, or imported from public library.',
+      'They can be defined eigher by users, admins, or imported from public library.',
   },
   {
     selector: '.GraphRoot',
     content: 'Workflow Editor has a central place in Plynx. ' +
-        'It allows you to easily build new pipelines, improve existing ones or create new experiments with the workflow.',
+      'It allows you to easily build new pipelines, improve existing ones or create new experiments with the workflow.',
   },
   {
     selector: '.GraphRoot .node',
     content: 'Plynx is domain and framework agnostic platform. ' +
-        'Operation can be a python script, API call, model inference function, interaction with other services, etc. ' +
-        'The complexity under the hood does not matter.  What matters is what role it plays in your workflow.',
+      'Operation can be a python script, API call, model inference function, interaction with other services, etc. ' +
+      'The complexity under the hood does not matter.  What matters is what role it plays in your workflow.',
   },
   {
     selector: '.GraphRoot .connector',
     content: 'The relations between Operations are defined by the edges. ' +
-        'Depending on the use case, the entire Workflow will be exectuded in multiple independent containers, ' +
-        'compiled to a single executable file for higher performance or converted into Spark or AWS Step Functions workflow.',
+      'Depending on the use case, the entire Workflow will be exectuded in multiple independent containers, ' +
+      'compiled to a single executable file for higher performance or converted into Spark or AWS Step Functions workflow.',
   },
   {
     selector: '.PropertiesBar',
     content: 'This toolbar contains properties of Workflow or Operations. Feel free to customize your Workflows in an intuitive way. ' +
-        'You may change target variable, number of hidden layers, aggregation function, model version, etc.',
+      'You may change target variable, number of hidden layers, aggregation function, model version, etc.',
   },
   {
     selector: '.ParameterItem',
     content: 'The Parameters are customizable. Depending on use case, it can be a string, number, enum, list, or even code. ' +
-        'You may also override their values base on global Workflow-level Parameters.',
+      'You may also override their values base on global Workflow-level Parameters.',
   },
   {
     selector: '.control-panel',
@@ -127,7 +127,7 @@ class Graph extends Component {
     }
 
     this.generatedCodeHeader =
-`#!/usr/bin/env python
+      `#!/usr/bin/env python
 from plynx.api import Operation, File, Graph, Client
 TOKEN = '` + token + `'
 ENDPOINT = '` + API_ENDPOINT + `'
@@ -168,9 +168,9 @@ ENDPOINT = '` + API_ENDPOINT + `'
       // Remove broken references
       for (parameter of node.parameters) {
         if (parameter.reference &&
-            (!parameterNameToGraphParameter.hasOwnProperty(parameter.reference)
-                || parameter.parameter_type !== parameterNameToGraphParameter[parameter.reference].parameter_type
-            )
+          (!parameterNameToGraphParameter.hasOwnProperty(parameter.reference)
+            || parameter.parameter_type !== parameterNameToGraphParameter[parameter.reference].parameter_type
+          )
         ) {
           parameter.reference = null;
         }
@@ -189,18 +189,18 @@ ENDPOINT = '` + API_ENDPOINT + `'
           prevInputToInputReferences[input.name + input.file_type] = input.input_references;
         }
         node.inputs = this.graph_node.outputs.map(
-              (output) => {
-                return {
-                  name: output.name,
-                  file_type: output.file_type,
-                  values: output.values,
-                  input_references:
-                    prevInputToInputReferences[output.name + output.file_type] ? prevInputToInputReferences[output.name + output.file_type] : [],
-                  min_count: output.min_count,
-                  is_array: output.is_array,
-                };
-              }
-          );
+          (output) => {
+            return {
+              name: output.name,
+              file_type: output.file_type,
+              values: output.values,
+              input_references:
+                prevInputToInputReferences[output.name + output.file_type] ? prevInputToInputReferences[output.name + output.file_type] : [],
+              min_count: output.min_count,
+              is_array: output.is_array,
+            };
+          }
+        );
       }
       this.node_lookup[node._id] = node;
     }
@@ -235,8 +235,9 @@ ENDPOINT = '` + API_ENDPOINT + `'
             "from_block": from_block,
             "from": from,
             "to_block": node._id,
-            "to": node.inputs[j].name}
-              );
+            "to": node.inputs[j].name
+          }
+          );
         }
         for (let v = inputValueIndexToRemove.length - 1; v >= 0; --v) {
           node.inputs[j].input_references.splice(inputValueIndexToRemove[v], 1);
@@ -328,7 +329,7 @@ ENDPOINT = '` + API_ENDPOINT + `'
     }
 
     if (node_input.input_references.filter(
-        (a) => a.node_id === from_nid && a.output_id === from_pin).length > 0) {
+      (a) => a.node_id === from_nid && a.output_id === from_pin).length > 0) {
       this.props.showAlert("Connection already exists", 'warning');
       return;
     }
@@ -352,7 +353,7 @@ ENDPOINT = '` + API_ENDPOINT + `'
       });
     }
 
-    this.setState({connections: this.connections});
+    this.setState({ connections: this.connections });
 
     this.props.onNodeChange(this.graph_node);
   }
@@ -373,7 +374,7 @@ ENDPOINT = '` + API_ENDPOINT + `'
     });
 
     this.connections = connections;
-    this.setState({connections: connections});
+    this.setState({ connections: connections });
 
     this.props.onNodeChange(this.graph_node);
   }
@@ -386,8 +387,8 @@ ENDPOINT = '` + API_ENDPOINT + `'
     }
 
     this.nodes.splice(
-        this.nodes.map(node => node._id === nid).indexOf(true),     // simply indexOf does not work!
-        1
+      this.nodes.map(node => node._id === nid).indexOf(true),     // simply indexOf does not work!
+      1
     );
 
     delete this.node_lookup[nid];
@@ -581,13 +582,13 @@ ENDPOINT = '` + API_ENDPOINT + `'
         node = this.graph_node;
       }
       const node_parameter = node.parameters.find(
-          (param) => {
-            return param.name === name;
-          }
-        );
+        (param) => {
+          return param.name === name;
+        }
+      );
       if (node_parameter) {
         node_parameter.value = value;
-      } else if (name === '_DESCRIPTION' || name === '_TITLE') {
+      } else if (name === '_DESCRIPTION' || name === '_TITLE' || name === '_SCHEDULE') {
         const inName = name.substring(1, name.length).toLowerCase();
         const block = this.node_lookup[node_id];
         node[inName] = value;
@@ -597,7 +598,7 @@ ENDPOINT = '` + API_ENDPOINT + `'
           block[inName] = value;
         } else {
           // using for node, it is hard to update descriptions
-          this.setState({graph: this.graph_node});
+          this.setState({ graph: this.graph_node });
         }
       } else {
         throw new Error("Parameter not found");
@@ -652,10 +653,10 @@ ENDPOINT = '` + API_ENDPOINT + `'
     for (node_id of node_ids) {
       const node = this.node_lookup[node_id];
       const node_parameter = node.parameters.find(
-          (param) => {
-            return param.name === name;
-          }
-        );
+        (param) => {
+          return param.name === name;
+        }
+      );
       if (!node_parameter) {
         throw new Error("Parameter not found");
       }
@@ -676,7 +677,7 @@ ENDPOINT = '` + API_ENDPOINT + `'
       publicable: true,
       widget: "None",
     }].concat(
-        this.graph_node.parameters.filter((parameter) => parameter.parameter_type === parameter_type && parameter.widget)
+      this.graph_node.parameters.filter((parameter) => parameter.parameter_type === parameter_type && parameter.widget)
     );
 
     let linkParametersIndex = 0;
@@ -831,9 +832,9 @@ ENDPOINT = '` + API_ENDPOINT + `'
 
   render() {
     return (
-    <HotKeys className="GraphNode"
-             handlers={this.keyHandlers} keyMap={KEY_MAP}
-    >
+      <HotKeys className="GraphNode"
+        handlers={this.keyHandlers} keyMap={KEY_MAP}
+      >
         <div className={'BackgroundLabels ' + (this.state.editable ? 'editable' : 'readonly')}>
           <div className="Title">{this.state.graph.title}</div>
           <div className="Description">&ldquo;{this.state.graph.description}&rdquo;</div>
@@ -845,7 +846,7 @@ ENDPOINT = '` + API_ENDPOINT + `'
             fileObj={this.state.fileObj}
             hideDeprecate  // TODO let the author to deprecate file
             onPreview={(previewData) => this.handlePreview(previewData)}
-            />
+          />
         }
         {
           (this.state.previewData) &&
@@ -881,15 +882,15 @@ ENDPOINT = '` + API_ENDPOINT + `'
           />
         }
         {
-            this.state.linkParameters &&
-            <ParameterSelectionDialog
-              title={"Link Graph parameter"}
-              parameters={this.state.linkParameters}
-              index={this.state.linkParametersIndex}
-              onClose={() => this.handleCloseParameterLinkDialog()}
-              onIndexChanged={(index) => this.handleIndexLinkChange(index)}
-              readOnly={!this.state.editable}
-            />
+          this.state.linkParameters &&
+          <ParameterSelectionDialog
+            title={"Link Graph parameter"}
+            parameters={this.state.linkParameters}
+            index={this.state.linkParametersIndex}
+            onClose={() => this.handleCloseParameterLinkDialog()}
+            onIndexChanged={(index) => this.handleIndexLinkChange(index)}
+            readOnly={!this.state.editable}
+          />
         }
 
         {/* Visible and flex layout blocks */}
@@ -919,21 +920,21 @@ ENDPOINT = '` + API_ENDPOINT + `'
           key={'graph' + this.state.editable}
         />
 
-        { this.state.editable !== null &&
-        <PropertiesBar className="PropertiesBar"
-                      ref={(child) => {
-                        this.propertiesBar = child;
-                      }}
-                      onParameterChanged={(node_ids, name, value) => this.handleParameterChanged(node_ids, name, value)}
-                      editable={this.state.editable}
-                      initialNode={this.graph_node}
-                      onPreview={(previewData) => this.handlePreview(previewData)}
-                      key={"prop" + this.state.editable}
-                      onFileShow={(nid) => this.handleShowFile(nid)}
-                      onLinkClick={(node_ids, name) => this.handleLinkClick(node_ids, name)}
-        />
+        {this.state.editable !== null &&
+          <PropertiesBar className="PropertiesBar"
+            ref={(child) => {
+              this.propertiesBar = child;
+            }}
+            onParameterChanged={(node_ids, name, value) => this.handleParameterChanged(node_ids, name, value)}
+            editable={this.state.editable}
+            initialNode={this.graph_node}
+            onPreview={(previewData) => this.handlePreview(previewData)}
+            key={"prop" + this.state.editable}
+            onFileShow={(nid) => this.handleShowFile(nid)}
+            onLinkClick={(node_ids, name) => this.handleLinkClick(node_ids, name)}
+          />
         }
-    </HotKeys>
+      </HotKeys>
     );
   }
 }

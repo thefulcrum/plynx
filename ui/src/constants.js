@@ -223,3 +223,8 @@ export const REGISTER_USER_EXCEPTION_CODE = Object.freeze({
 });
 
 export const DEFAULT_WORKFLOW_KIND = 'basic-dag-workflow';
+export const PYTHON_WORKFLOW_KIND = "python-workflow";
+export const WORKFLOW_KINDS = [
+  DEFAULT_WORKFLOW_KIND,
+  PYTHON_WORKFLOW_KIND
+]
