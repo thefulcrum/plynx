@@ -40,8 +40,8 @@ export default class PropertiesBar extends Component {
 
   /**
    * Add schedule parameter if the node is a workflow kind.
-   * @param {*} nodes
-   * @param {*} parameters
+   * @param {*} nodes can be both workflow or operation
+   * @param {*} parameters the parameters of the workflow or operation, eg, title. description
    */
   addScheduleParameter(nodes, parameters) {
 
