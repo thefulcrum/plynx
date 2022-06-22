@@ -13,7 +13,12 @@ from plynx.service.worker import run_worker
 from plynx.utils.config import get_config, set_parameter
 from plynx.utils.logs import set_logging_level
 
+from plynx.cdp.src.utils import init_hub_config
+
 _config = get_config()
+
+# load minimum config for the orm from hubcommon
+init_hub_config()
 
 
 @dataclass

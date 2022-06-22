@@ -3,9 +3,13 @@ from __future__ import absolute_import
 
 import json
 from typing import Optional
+from http import HTTPStatus
 
 import bson.objectid
 from flask import g, request
+from croniter import croniter
+
+from hubcommon.v1.support.exceptions.messages import INVALID_CRONTAB_EXPRESSION
 
 import plynx.base.hub
 import plynx.db.node_collection_manager
@@ -15,6 +19,7 @@ from plynx.constants import Collections, IAMPolicies, NodeClonePolicy, NodePostA
 from plynx.db.node import Node
 from plynx.utils.common import to_object_id
 from plynx.web.common import app, handle_errors, logger, make_fail_response, make_permission_denied, make_success_response, requires_auth
+from plynx.cdp.src.db import add_celery_periodic_task, delete_celery_periodic_task
 
 PAGINATION_QUERY_KEYS = {'per_page', 'offset', 'status', 'hub', 'node_kinds', 'search', 'user_id'}
 
@@ -69,7 +74,7 @@ def post_search_nodes(collection: str):
 @handle_errors
 @requires_auth
 def get_nodes(collection: str, node_link: Optional[str] = None):
-    """Get the Node based on its ID or kind"""
+    """Get the Node (workflow or operation) based on its ID or kind."""
     # pylint: disable=too-many-locals,too-many-return-statements,too-many-branches
     user_id = to_object_id(g.user._id)
 
@@ -178,6 +183,19 @@ def post_node(collection: str):
 
         if is_author or is_admin or (is_workflow and can_modify_others_workflows):
             node.save(force=True)
+
+            if is_workflow:
+                if node.schedule:
+                    if not croniter.is_valid(node.schedule):
+                        return (
+                            make_fail_response(INVALID_CRONTAB_EXPRESSION),
+                            HTTPStatus.BAD_REQUEST
+                        )
+
+                    add_celery_periodic_task(str(node._id), node.schedule)
+                else:
+                    delete_celery_periodic_task(str(node._id))
+
         else:
             return make_permission_denied('Only the owners or users with CAN_MODIFY_OTHERS_WORKFLOWS role can save it')
 

@@ -145,6 +145,9 @@ class Node(DBObject):
     outputs: List[Output] = field(default_factory=list)
     logs: List[Output] = field(default_factory=list)
 
+    # workflow (DAG) schedule field
+    schedule: Optional[str] = None
+
     @staticmethod
     def _default_log(name: str) -> Output:
         return Output(
